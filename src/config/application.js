@@ -108,6 +108,7 @@ const appConfig = {
     utility: true,                  
     community: true,                
     fun: true,                      
+    scheduler: true,                
 
     
     music: false,                   

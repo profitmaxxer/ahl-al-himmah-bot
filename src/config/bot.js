@@ -290,6 +290,18 @@ export const botConfig = {
   },
 
   // =========================
+  // SCHEDULED MESSAGES
+  // =========================
+  scheduler: {
+    // Default timezone used when a schedule does not provide one.
+    defaultTimezone: process.env.SCHEDULER_DEFAULT_TIMEZONE || "Africa/Casablanca",
+    // How often the scheduler checks for updated DB definitions.
+    refreshIntervalSeconds: Number.parseInt(process.env.SCHEDULER_REFRESH_SECONDS || "60", 10),
+    // Max number of pooled messages kept per schedule.
+    maxPoolItems: Number.parseInt(process.env.SCHEDULER_MAX_POOL_ITEMS || "500", 10),
+  },
+
+  // =========================
   // VERIFICATION SETTINGS
   // =========================
   verification: {
@@ -465,6 +477,7 @@ export const botConfig = {
     utility: true,
     community: true,
     fun: true,
+    scheduler: true,
   },
 };
 
@@ -548,7 +561,6 @@ export function getRandomColor() {
 }
 
 export default botConfig;
-
 
 
 

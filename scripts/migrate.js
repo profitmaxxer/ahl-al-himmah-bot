@@ -185,6 +185,34 @@ const createTables = async (client) => {
     )`,
 
     
+    `CREATE TABLE IF NOT EXISTS scheduled_messages (
+      id SERIAL PRIMARY KEY,
+      guild_id VARCHAR(255) NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      channel_id VARCHAR(255) NOT NULL,
+      message_mode VARCHAR(20) NOT NULL,
+      schedule_mode VARCHAR(20) NOT NULL,
+      schedule_value VARCHAR(120) NOT NULL,
+      timezone VARCHAR(64) NOT NULL DEFAULT 'Africa/Casablanca',
+      text_content TEXT,
+      embed_payload JSONB,
+      pool_payload JSONB DEFAULT '[]',
+      random_strategy VARCHAR(20) NOT NULL DEFAULT 'random',
+      pool_state JSONB,
+      enabled BOOLEAN NOT NULL DEFAULT true,
+      mention_everyone BOOLEAN NOT NULL DEFAULT false,
+      mention_here BOOLEAN NOT NULL DEFAULT false,
+      mention_role_ids TEXT[] DEFAULT '{}',
+      last_run_at TIMESTAMP,
+      last_sent_item_index INTEGER,
+      created_by VARCHAR(255),
+      updated_by VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(guild_id, name)
+    )`,
+
+    
     `CREATE TABLE IF NOT EXISTS audit_logs (
       id SERIAL PRIMARY KEY,
       guild_id VARCHAR(255) NOT NULL,
@@ -216,6 +244,8 @@ const createIndexes = async (client) => {
     'CREATE INDEX IF NOT EXISTS idx_user_economy_guild ON user_economy(guild_id)',
     'CREATE INDEX IF NOT EXISTS idx_tickets_guild ON tickets(guild_id)',
     'CREATE INDEX IF NOT EXISTS idx_giveaways_guild ON giveaways(guild_id)',
+    'CREATE INDEX IF NOT EXISTS idx_scheduled_messages_guild ON scheduled_messages(guild_id)',
+    'CREATE INDEX IF NOT EXISTS idx_scheduled_messages_enabled ON scheduled_messages(enabled)',
     'CREATE INDEX IF NOT EXISTS idx_audit_logs_guild ON audit_logs(guild_id)',
   ];
 
@@ -270,6 +300,10 @@ const createTriggers = async (client) => {
     {
       table: 'counters',
       name: 'update_counters_timestamp'
+    },
+    {
+      table: 'scheduled_messages',
+      name: 'update_scheduled_messages_timestamp'
     }
   ];
 

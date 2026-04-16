@@ -1,4 +1,4 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import express from 'express';
@@ -12,6 +12,7 @@ import { logger, startupLog, shutdownLog } from './utils/logger.js';
 import { checkBirthdays } from './services/birthdayService.js';
 import { checkGiveaways } from './services/giveawayService.js';
 import { loadCommands, registerCommands as registerSlashCommands } from './handlers/commandLoader.js';
+import { startScheduledMessages } from './services/scheduledMessagesService.js';
 
 class TitanBot extends Client {
   constructor() {
@@ -41,6 +42,7 @@ class TitanBot extends Client {
     this.modals = new Collection();
     this.cooldowns = new Collection();
     this.db = null;
+    this.scheduledMessagesHandle = null;
     this.rest = new REST({ version: '10' }).setToken(config.bot.token);
   }
 
@@ -231,6 +233,7 @@ class TitanBot extends Client {
     cron.schedule('0 6 * * *', () => checkBirthdays(this));
     cron.schedule('* * * * *', () => checkGiveaways(this));
     cron.schedule('*/15 * * * *', () => this.updateAllCounters());
+    this.scheduledMessagesHandle = startScheduledMessages(this);
   }
 
   async updateAllCounters() {
@@ -316,6 +319,7 @@ class TitanBot extends Client {
     try {
       
       logger.info('Stopping cron jobs...');
+      this.scheduledMessagesHandle?.stop?.();
       cron.getTasks().forEach(task => task.stop());
       logger.info('✅ Cron jobs stopped');
 

@@ -392,6 +392,33 @@ class PostgreSQLDatabase {
                 PRIMARY KEY (guild_id, role_id),
                 FOREIGN KEY (guild_id) REFERENCES ${pgConfig.tables.guilds}(id) ON DELETE CASCADE
             )`,
+
+            `CREATE TABLE IF NOT EXISTS ${pgConfig.tables.scheduled_messages} (
+                id SERIAL PRIMARY KEY,
+                guild_id VARCHAR(20) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                channel_id VARCHAR(20) NOT NULL,
+                message_mode VARCHAR(20) NOT NULL,
+                schedule_mode VARCHAR(20) NOT NULL,
+                schedule_value VARCHAR(120) NOT NULL,
+                timezone VARCHAR(64) NOT NULL DEFAULT 'Africa/Casablanca',
+                text_content TEXT,
+                embed_payload JSONB,
+                pool_payload JSONB DEFAULT '[]',
+                random_strategy VARCHAR(20) NOT NULL DEFAULT 'random',
+                pool_state JSONB,
+                enabled BOOLEAN NOT NULL DEFAULT true,
+                mention_everyone BOOLEAN NOT NULL DEFAULT false,
+                mention_here BOOLEAN NOT NULL DEFAULT false,
+                mention_role_ids TEXT[] DEFAULT '{}',
+                last_run_at TIMESTAMP,
+                last_sent_item_index INTEGER,
+                created_by VARCHAR(20),
+                updated_by VARCHAR(20),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (guild_id, name)
+            )`,
             
             `CREATE TABLE IF NOT EXISTS ${pgConfig.tables.temp_data} (
                 key VARCHAR(255) PRIMARY KEY,
@@ -443,6 +470,8 @@ class PostgreSQLDatabase {
             `CREATE INDEX IF NOT EXISTS idx_verification_audit_guild_id ON ${pgConfig.tables.verification_audit}(guild_id)`,
             `CREATE INDEX IF NOT EXISTS idx_verification_audit_user_id ON ${pgConfig.tables.verification_audit}(user_id)`,
             `CREATE INDEX IF NOT EXISTS idx_verification_audit_created_at ON ${pgConfig.tables.verification_audit}(created_at)`,
+            `CREATE INDEX IF NOT EXISTS idx_scheduled_messages_guild_id ON ${pgConfig.tables.scheduled_messages}(guild_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_scheduled_messages_enabled ON ${pgConfig.tables.scheduled_messages}(enabled)`,
             `CREATE INDEX IF NOT EXISTS idx_temp_data_expires_at ON ${pgConfig.tables.temp_data}(expires_at)`,
             `CREATE INDEX IF NOT EXISTS idx_cache_data_expires_at ON ${pgConfig.tables.cache_data}(expires_at)`
         ];
@@ -489,6 +518,7 @@ class PostgreSQLDatabase {
                 { name: 'update_giveaways_updated_at', table: pgConfig.tables.giveaways },
                 { name: 'update_tickets_updated_at', table: pgConfig.tables.tickets },
                 { name: 'update_afk_status_updated_at', table: pgConfig.tables.afk_status },
+                { name: 'update_scheduled_messages_updated_at', table: pgConfig.tables.scheduled_messages },
             ];
 
             const allowedTriggerIdentifiers = new Set(triggers.map(trigger => trigger.name));
@@ -1268,6 +1298,5 @@ class PostgreSQLDatabase {
 const pgDb = new PostgreSQLDatabase();
 
 export { PostgreSQLDatabase, pgDb };
-
 
 
